@@ -1,0 +1,41 @@
+version = 1
+global_guidance = "Scout rule: leave code cleaner than you found it."
+
+# Define repo layout / thresholds once and reference them as ${name} in any
+# sensor `run` below. Keeps paths and limits DRY across sensors. Optional.
+# [vars]
+# backend = "."
+# max_cc  = "10"
+
+[[sensors]]
+id = "complexity"
+run = "python .cairn/sensors/radon_sensor.py --max-cc 10 ."
+category = "maintainability"
+stage = ["in-session", "pre-commit", "ci"]
+threshold = { metric = "max_cc", value = 10, direction = "lower-is-better" }
+guidance = """
+Cyclomatic complexity over threshold. Extract functions or simplify branches.
+If refactoring is not sensible here, raise the threshold slightly (do not
+suppress) so the sensor re-fires if it worsens.
+"""
+
+[[sensors]]
+id = "lint"
+run = "python .cairn/sensors/ruff_sensor.py --select E,F,I ."
+category = "maintainability"
+stage = ["in-session", "pre-commit", "ci"]
+guidance = """
+Lint issue from ruff (bugs, unused imports/vars, import order). Fix it. If a
+diagnostic is a deliberate exception, add a targeted `# noqa: <code>` with a
+reason rather than leaving it unaddressed.
+"""
+
+# Example architecture-fitness sensor. Adjust the --forbid rules to your layers,
+# then remove this comment. Left disabled-by-default via an unreachable rule so
+# a fresh repo starts green; edit `run` to enforce real boundaries.
+# [[sensors]]
+# id = "layers"
+# run = "python .cairn/sensors/layers_sensor.py --root . --forbid app.clients:app.services ."
+# category = "architecture"
+# stage = ["in-session", "pre-commit", "ci"]
+# guidance = "Layer violation: lower layers must not import higher ones."

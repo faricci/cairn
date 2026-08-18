@@ -1,0 +1,48 @@
+# Cairn harness install manifest.
+# Paths in `src` are relative to the Cairn source root (the dir with cairn.py).
+# Paths in `dst` are relative to the target repo.
+#
+# Flags:
+#   executable = true   -> best-effort chmod +x after copy (hooks)
+#   once       = true   -> install only if absent; never overwrite (user-owned
+#                          files like config and guides). Not treated as drift.
+
+# --- Cairn engine, vendored so the repo is self-contained ---
+[[copy]]
+src = "cairn.py"
+dst = ".cairn/cairn.py"
+
+[[copy]]
+src = "cairnlib"
+dst = ".cairn/cairnlib"
+
+# --- Deterministic sensor wrappers ---
+[[copy]]
+src = "harness/sensors"
+dst = ".cairn/sensors"
+
+# --- User-owned config (seeded once, then hand-tuned) ---
+[[copy]]
+src = "harness/cairn.toml"
+dst = ".cairn/cairn.toml"
+once = true
+
+# --- Guides (feedforward) ---
+# The full working agreement is the single source of truth, always refreshed
+# by `apply`. A small managed pointer block is merged (non-destructively) into
+# the target's agent instruction files (AGENTS.md, copilot, cursor, ...) by the
+# agent-injection step, so an existing AGENTS.md is never overwritten.
+[[copy]]
+src = "harness/guides/AGENTS.md"
+dst = ".cairn/guides/AGENTS.cairn.md"
+
+[[copy]]
+src = "harness/guides/cognitive-framework.md"
+dst = ".cairn/guides/cognitive-framework.md"
+once = true
+
+# --- Blocking backstop ---
+[[copy]]
+src = "harness/hooks/pre-commit"
+dst = ".git/hooks/pre-commit"
+executable = true

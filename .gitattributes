@@ -1,0 +1,18 @@
+# Normalise line endings. A CRLF in a shebang line makes the kernel look for an
+# interpreter literally named "python\r", which fails on Linux/macOS. That would
+# break the pre-commit hook and the ./cairn launcher for every non-Windows user,
+# so these must be LF regardless of the contributor's platform.
+* text=auto eol=lf
+
+# Belt and braces for the two files whose first line is a shebang.
+harness/hooks/pre-commit text eol=lf
+cairn                    text eol=lf
+
+# Windows-only launcher: CRLF is correct here.
+cairn.cmd text eol=crlf
+
+# Never touch binaries.
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary

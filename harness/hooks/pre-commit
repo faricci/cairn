@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+"""Cairn pre-commit backstop (Python, no bash required).
+
+Runs `cairn gate --stage pre-commit`, blocking the commit when a
+pre-commit-staged sensor fails. Written in Python -- not bash -- so it also works
+on locked-down Windows where git's bundled `bash.exe` is blocked by policy
+(AppLocker/AV): git executes this file via its shebang `#!/usr/bin/env python`,
+which resolves to the allowed system interpreter. Installed by `cairn apply`.
+
+Set CAIRN_SKIP=1 to bypass in an emergency (discouraged).
+"""
+import os
+import shutil
+import subprocess
+import sys
+
+GATE_ARGS = ["gate", "--stage", "pre-commit", "--target", "."]
+
+
+def main() -> int:
+    if os.environ.get("CAIRN_SKIP") == "1":
+        return 0
+
+    # Prefer the vendored copy run with THIS interpreter: no PATH lookup, and
+    # immune to the Windows `python3` Microsoft Store alias.
+    vendored = os.path.join(".cairn", "cairn.py")
+    if os.path.isfile(vendored):
+        return subprocess.call([sys.executable, vendored, *GATE_ARGS])
+
+    cairn = shutil.which("cairn")
+    if cairn:
+        return subprocess.call([cairn, *GATE_ARGS])
+
+    sys.stderr.write("cairn: not found (no .cairn/cairn.py and 'cairn' not on PATH)\n")
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -8,6 +8,8 @@
 
 Coding agents produce code quickly — not always correct code. Left unsupervised they stray: complexity climbs, security holes creep in, dead code and unused imports pile up, architectural boundaries erode. Reviewers become the only safety net, catching it one pull request at a time, too late and too slowly.
 
+Cairn is an implementation of the model Birgitta Böckeler describes in [Harness engineering for coding agent users](https://martinfowler.com/articles/harness-engineering.html): an agent wrapped in *guides* that steer it before it acts and *sensors* that observe the code after it does.
+
 Cairn is the **harness** around the agent: a thin, deterministic feedback loop that catches those regressions *while the code is being written*, not after review or in production. Small **sensors** run the tools you already have — ruff, radon, pytest, cppcheck, layering rules — and emit one common signal the agent reads and self-corrects against. The same sensors become a blocking **gate** at commit and in CI, so if no agent ever reads a word of it the floor still holds, and human-written code is caught the same way. Adding a check means writing one wrapper script; the engine never changes.
 
 ## What it looks like
